@@ -1,0 +1,41 @@
+/*
+ * Purpose : Generic utility class to create sharing record.
+ */
+ 
+public without sharing class SharingUtility {
+
+    public static void createSharingForStandardObject(String strShareObjectName, String strParentField, map<Id, set<Id>> mapObjectIdUserIds, String strAccessLevelFieldName, String strAccessLevel, String strRowCause) {
+        SObjectType objectType = Schema.getGlobalDescribe().get(strShareObjectName);
+        list<SObject> lstObjects = new list<SObject>();
+        
+        for(Id objectId : mapObjectIdUserIds.keySet()) {
+        	for(Id userOrGroupId : mapObjectIdUserIds.get(objectId)) {
+		        SObject shareRecord = objectType.newsObject();
+		        shareRecord.put(strParentField, objectId);
+		        shareRecord.put('UserOrGroupId', userOrGroupId);
+		        shareRecord.put(strAccessLevelFieldName, strAccessLevel);
+		        shareRecord.put('RowCause', strRowCause);
+		        lstObjects.add(shareRecord);
+        	}
+        }
+        insert lstObjects;
+    }
+    
+    public static void createSharingForCustomObject(String strShareObjectName, map<Id, set<Id>> mapObjectIdUserIds, String strAccessLevel, String strRowCause) {
+        SObjectType objectType = Schema.getGlobalDescribe().get(strShareObjectName);
+        list<SObject> lstObjects = new list<SObject>();
+        
+        for(Id objectId : mapObjectIdUserIds.keySet()) {
+        	for(Id userOrGroupId : mapObjectIdUserIds.get(objectId)) {
+		        SObject shareRecord = objectType.newsObject();
+		        shareRecord.put('ParentId', objectId);
+		        shareRecord.put('UserOrGroupId', userOrGroupId);
+		        shareRecord.put('AccessLevel', strAccessLevel);
+		        shareRecord.put('RowCause', strRowCause);
+		        lstObjects.add(shareRecord);
+        	}
+        }
+        insert lstObjects;
+    }
+
+}
